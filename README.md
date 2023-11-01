@@ -27,4 +27,4 @@ TestAutomationSession session = new TestAutomationSession()
     session.end();
 ```
 
-To run a local execution, simply use ```.withCloud("demo")```.
+To run a local execution, simply use ```.withCloud("local")```.

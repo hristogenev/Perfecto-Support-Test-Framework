@@ -27,4 +27,4 @@ TestAutomationSession session = new TestAutomationSession()
     session.end();
 ```
 
-To run a local execution, simply use ```.withCloud("local")```.
+To run a local execution, simply use ```.withCloud("local")```. Make sure you are running a local Appiums server 

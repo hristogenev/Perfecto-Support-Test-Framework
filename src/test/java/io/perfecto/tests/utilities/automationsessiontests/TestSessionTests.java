@@ -2,6 +2,8 @@ package io.perfecto.tests.utilities.automationsessiontests;
 
 import io.perfecto.tests.utilities.CommonProperties;
 import io.perfecto.utilities.application.*;
+import io.perfecto.utilities.capabilities.DataCenterLocation;
+import io.perfecto.utilities.capabilities.ScreenResolution;
 import io.perfecto.utilities.reporting.Report;
 import io.perfecto.utilities.automationsession.TestAutomationSession;
 import io.perfecto.utilities.useractions.UserActions;
@@ -55,6 +57,38 @@ public class TestSessionTests {
                 .withAppId("com.android.settings")
                 .withAutoLaunch(false)
                 .create();
+
+        UserActions user = session.getUserActions();
+        Application app = session.getApplication();
+        Report report = session.getReport();
+
+        report.startTest("Test session tests");
+        report.startStep("Open app");
+        app.open();
+        report.endStep();
+
+        report.startStep("Click and type");
+        user.waitForAndClickOn(By.id("search_action_bar_title"));
+        user.waitForAndType(By.id("com.google.android.settings.intelligence:id/open_search_view_edit_text"), "wifi");
+        report.endStep();
+
+        report.startStep("Close app");
+        app.close();
+        report.endStep();
+
+        report.endTest();
+
+        session.end();
+    }
+
+
+    @Test
+    public void testSessionCreationOnRemoteWindows() throws Exception {
+        TestAutomationSession session = new TestAutomationSession()
+            .withPlatformWindows10()
+            .withResolution(ScreenResolution.WINDOWS_1600x1200)
+            .withLocation(DataCenterLocation.WINDOWS_US_EAST)
+            .create();
 
         UserActions user = session.getUserActions();
         Application app = session.getApplication();

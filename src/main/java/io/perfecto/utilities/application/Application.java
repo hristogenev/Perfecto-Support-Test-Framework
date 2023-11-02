@@ -185,7 +185,7 @@ public class Application {
         return this;
     }
 
-    public void restartAppWithId(String appId){
+    public void restartAppWithId(String appId) {
         openAppById(appId);
         closeAppWithId(appId);
     }

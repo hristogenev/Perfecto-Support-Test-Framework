@@ -4,10 +4,12 @@ import io.appium.java_client.remote.MobilePlatform;
 import io.perfecto.utilities.application.Application;
 import io.perfecto.utilities.capabilities.AppiumVersion;
 import io.perfecto.utilities.capabilities.CommonCapabilities;
+import io.perfecto.utilities.capabilities.ScreenResolution;
 import io.perfecto.utilities.extendedmobiledriver.ExtendedMobileDriver;
 import io.perfecto.utilities.reporting.Report;
 import io.perfecto.utilities.reporting.ReportBuilder;
 import io.perfecto.utilities.useractions.UserActions;
+import org.openqa.selenium.Platform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -408,4 +410,47 @@ public class TestAutomationSession {
         }
 
     }
+
+    public TestAutomationSession withPlatformNameWindows() {
+        commonCapabilities.platformName = Platform.WINDOWS.toString();
+        return this;
+    }
+
+    public TestAutomationSession withPlatformWindows10() {
+        commonCapabilities.platformName = Platform.WINDOWS.toString();
+        commonCapabilities.platformVersion = "10";
+        return this;
+    }
+
+    public TestAutomationSession withPlatformWindows11() {
+        commonCapabilities.platformName = Platform.WINDOWS.toString();
+        commonCapabilities.platformVersion = "11";
+        return this;
+    }
+
+    public TestAutomationSession withResolution(String screenResolution) {
+        commonCapabilities.resolution = screenResolution;
+        return this;
+    }
+
+    public TestAutomationSession withResolution2560x1440() {
+        commonCapabilities.resolution = "2560x1440";
+        return this;
+    }
+
+    public TestAutomationSession withResolution1920x1080() {
+        commonCapabilities.resolution = "1920x1080";
+        return this;
+    }
+
+    public TestAutomationSession withPlatformNameMac() {
+        commonCapabilities.platformName = Platform.MAC.toString();
+        return this;
+    }
+
+    public TestAutomationSession withLocation(String location) {
+        commonCapabilities.location = location;
+        return this;
+    }
+
 }

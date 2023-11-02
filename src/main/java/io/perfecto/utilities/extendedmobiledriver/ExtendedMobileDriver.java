@@ -20,9 +20,6 @@ import io.perfecto.utilities.capabilities.CommonCapabilities;
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
-import org.openqa.selenium.Platform;
-import org.openqa.selenium.remote.AbstractDriverOptions;
-import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,11 +31,11 @@ public class ExtendedMobileDriver<T extends AppiumDriver> {
     public CommonCapabilities capabilities;
     public final boolean isAndroid;
     public final boolean isIos;
-    public boolean isDesktop = false;
     public boolean preferAppiumBehavior = true;
     public final boolean isLocal;
     private String urlString;
     private T driver;
+    private AppiumDriver appiumDriver;
     private Class _class;
 
     private JavascriptExecutor javascriptExecutor;
@@ -63,7 +60,7 @@ public class ExtendedMobileDriver<T extends AppiumDriver> {
             logger.info("************* CAPABILITIES *************");
             isAndroid = true;
             isIos = false;
-            driver = (T) new AndroidDriver(url, (UiAutomator2Options) capabilities.toOptions());
+            appiumDriver = driver = (T) new AndroidDriver(url, (UiAutomator2Options) capabilities.toOptions());
             logSessionDetails();
             return;
         }
@@ -74,22 +71,9 @@ public class ExtendedMobileDriver<T extends AppiumDriver> {
             isAndroid = false;
             isIos = true;
             logger.info("************* CAPABILITIES *************");
-            driver = (T) new IOSDriver(url, (XCUITestOptions) capabilities.toOptions());
+            appiumDriver = driver = (T) new IOSDriver(url, (XCUITestOptions) capabilities.toOptions());
             logSessionDetails();
             return;
-        }
-
-        if (capabilities.platformName.equals(MobilePlatform.WINDOWS)) {
-            logger.info("Creating RemoteWebDriver with URL: {}", url);
-            _class = RemoteWebDriver.class;
-            isAndroid = false;
-            isIos = false;
-            isDesktop = true;
-            logger.info("************* CAPABILITIES *************");
-            driver = (T) new RemoteWebDriver(url, (AbstractDriverOptions) capabilities.toOptions());
-            logSessionDetails();
-            return;
-
         }
 
         throw new Exception(String.format("Unsupported driver exception %s", capabilities.platformName.toString()));

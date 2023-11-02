@@ -452,5 +452,4 @@ public class TestAutomationSession {
         commonCapabilities.location = location;
         return this;
     }
-
 }

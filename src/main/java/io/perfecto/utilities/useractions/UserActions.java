@@ -1,5 +1,9 @@
 package io.perfecto.utilities.useractions;
 
+import com.google.common.collect.ImmutableMap;
+import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.android.nativekey.AndroidKey;
+import io.appium.java_client.android.nativekey.KeyEvent;
 import io.perfecto.utilities.extendedmobiledriver.ExtendedMobileDriver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -323,5 +327,25 @@ public class UserActions {
             logger.error(ex.getMessage());
             return false;
         }
+    }
+
+    public void clickOnHomeScreen() {
+        if (driver.isAndroid)
+            ((AndroidDriver)driver.getDriver()).pressKey(new KeyEvent(AndroidKey.HOME));
+        else
+            driver.executeScript("mobile: pressButton", ImmutableMap.of("name", "home"));
+    }
+
+    public boolean tryClickOnHomeScreen() {
+        try {
+            if (driver.isAndroid)
+                ((AndroidDriver)driver.getDriver()).pressKey(new KeyEvent(AndroidKey.HOME));
+            else
+                driver.executeScript("mobile: pressButton", ImmutableMap.of("name", "home"));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return false;
+        }
+        return true;
     }
 }

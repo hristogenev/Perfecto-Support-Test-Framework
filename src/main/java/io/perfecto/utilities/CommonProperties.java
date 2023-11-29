@@ -8,35 +8,28 @@ public class CommonProperties {
 
     private static Properties properties;
 
-    public static String getProperty(String propertyName, Object defaultValue) {
-
-        if (properties != null)
-            return properties.getProperty(propertyName, (String)defaultValue);
-
+    private static void loadProperties() {
         try (InputStream input = new FileInputStream(CommonProperties.class.getClassLoader().getResource("common.properties").getPath())) {
             properties = new Properties();
             properties.load(input);
-            return properties.getProperty(propertyName);
-
         } catch (Exception ex) {
             ex.printStackTrace();
-            return (String)defaultValue;
         }
+    }
+
+    public static Object getProperty(String propertyName, String defaultValue) {
+
+        if (properties == null)
+            loadProperties();
+
+        return properties.getProperty(propertyName, defaultValue);
     }
 
     public static String getProperty(String propertyName) {
 
-        if (properties != null)
-            return properties.getProperty(propertyName, null);
+        if (properties == null)
+            loadProperties();
 
-        try (InputStream input = new FileInputStream(CommonProperties.class.getClassLoader().getResource("common.properties").getPath())) {
-            properties = new Properties();
-            properties.load(input);
-            return properties.getProperty(propertyName);
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return null;
-        }
+        return properties.getProperty(propertyName, null);
     }
 }

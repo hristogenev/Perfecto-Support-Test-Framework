@@ -1,27 +1,29 @@
 package io.perfecto.utilities.extendedmobiledriver;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
-import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.options.UiAutomator2Options;
 import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.ios.options.XCUITestOptions;
 import io.appium.java_client.remote.MobilePlatform;
 import io.appium.java_client.remote.SupportsContextSwitching;
+import io.perfecto.utilities.CommonProperties;
 import io.perfecto.utilities.UrlUtils;
 import io.perfecto.utilities.capabilities.CommonCapabilities;
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
+import org.openqa.selenium.remote.http.ClientConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.time.Duration;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 
 public class ExtendedMobileDriver<T extends AppiumDriver> {
@@ -35,11 +37,8 @@ public class ExtendedMobileDriver<T extends AppiumDriver> {
     public final boolean isLocal;
     private String urlString;
     private T driver;
-    private AppiumDriver appiumDriver;
     private Class _class;
-
     private JavascriptExecutor javascriptExecutor;
-
     public T getDriver() {
         return driver;
     }
@@ -51,32 +50,39 @@ public class ExtendedMobileDriver<T extends AppiumDriver> {
 
         this.capabilities = capabilities;
 
-        URL url = UrlUtils.getUrl(capabilities.cloudName);
+        String url = UrlUtils.getUrl(capabilities.cloudName);
         isLocal = capabilities.isLocalExecution();
 
-        if (capabilities.platformName.equals(MobilePlatform.ANDROID)) {
-            logger.info("Creating AndroidDriver with URL: {}", url);
-            _class = AndroidDriver.class;
-            logger.info("************* CAPABILITIES *************");
-            isAndroid = true;
-            isIos = false;
-            appiumDriver = driver = (T) new AndroidDriver(url, (UiAutomator2Options) capabilities.toOptions());
-            logSessionDetails();
-            return;
-        }
+        Duration readTimeout = Duration.ofSeconds(
+            Integer.valueOf((String) CommonProperties.getProperty("selenium.readTimeout.duration.seconds", "300")));
 
-        if (capabilities.platformName.equals(MobilePlatform.IOS)) {
-            logger.info("Creating IOSDriver with URL: {}", url);
-            _class = IOSDriver.class;
-            isAndroid = false;
-            isIos = true;
-            logger.info("************* CAPABILITIES *************");
-            appiumDriver = driver = (T) new IOSDriver(url, (XCUITestOptions) capabilities.toOptions());
-            logSessionDetails();
-            return;
-        }
+        ClientConfig clientConfig = ClientConfig.defaultConfig()
+            .baseUri(URI.create(url))
+            .readTimeout(readTimeout);
 
-        throw new Exception(String.format("Unsupported driver exception %s", capabilities.platformName.toString()));
+        switch (capabilities.platformName) {
+            case MobilePlatform.ANDROID -> {
+                logger.info("Creating AndroidDriver with URL: {}", url);
+                _class = AndroidDriver.class;
+                logger.info("************* CAPABILITIES *************");
+                isAndroid = true;
+                isIos = false;
+                driver = (T) new AndroidDriver(clientConfig, (UiAutomator2Options) capabilities.toOptions());
+            }
+            case MobilePlatform.IOS -> {
+                logger.info("Creating IOSDriver with URL: {}", url);
+                _class = IOSDriver.class;
+                isAndroid = false;
+                isIos = true;
+                logger.info("************* CAPABILITIES *************");
+                driver = (T) new IOSDriver(clientConfig, (XCUITestOptions) capabilities.toOptions());
+                logSessionDetails();
+            }
+            default -> {
+                throw new Exception(String.format("Unsupported driver exception %s", capabilities.platformName.toString()));
+            }
+        }
+        logSessionDetails();
     }
 
     private void logSessionDetails() {
@@ -89,7 +95,7 @@ public class ExtendedMobileDriver<T extends AppiumDriver> {
 
     public void quit() {
         try {
-            logger.info("Quitting driver");
+            logger.info("Quitting driver. Please wait!");
             driver.quit();
         } catch (Exception ex) {
             logger.error(ex.toString());
@@ -150,36 +156,38 @@ public class ExtendedMobileDriver<T extends AppiumDriver> {
         ((SupportsContextSwitching) driver).context("NATIVE_APP");
     }
 
+    /**
+     * Switches to the first available WEBVIEW context
+     * @throws Exception
+     */
     public void switchToWebviewContext() throws Exception {
         for (String context : getContextHandles()) {
             if (context.toUpperCase().startsWith("WEBVIEW")) {
                 logger.info("Switching to {} context", context);
                 ((SupportsContextSwitching) driver).context(context);
+                return;
             }
         }
         throw new Exception("Unable to switch to WEBVIEW context. There is none!");
 
     }
 
-    public void switchToWebviewChromeContext() throws Exception {
-        for (String context : getContextHandles()) {
-            if (context.toUpperCase().startsWith("WEBVIEW_CHROME")) {
-                logger.info("Switching to {} context", context);
-                ((SupportsContextSwitching) driver).context(context);
-            }
-        }
-        throw new Exception("Unable to switch to WEBVIEW context. There is none!");
-
+    /**
+     * Switches to the first available WEBVIEW_chrome context
+     * @throws Exception
+     */
+    public void switchToWebviewChromeContext() {
+        logger.info("Switching to WEBVIEW_chrome context");
+        ((SupportsContextSwitching) driver).context("WEBVIEW_chrome");
     }
 
-    public void switchToChromiumContext() throws Exception {
-        for (String context : getContextHandles()) {
-            if (context.toUpperCase().startsWith("CHROMIUM")) {
-                logger.info("Switching to {} context", context);
-                ((SupportsContextSwitching) driver).context(context);
-            }
-        }
-        throw new Exception("Unable to switch to CHROMIUM context. There is none!");
+    /**
+     * Switches to the first available Chromium context
+     * @throws Exception
+     */
+    public void switchToChromiumContext() {
+        logger.info("Switching to Chromium context");
+        ((SupportsContextSwitching) driver).context("CHROMIUM");
     }
 
     public void context(String context) {

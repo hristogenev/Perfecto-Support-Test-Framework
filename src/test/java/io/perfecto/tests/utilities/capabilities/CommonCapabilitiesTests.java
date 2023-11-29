@@ -1,5 +1,7 @@
 package io.perfecto.tests.utilities.capabilities;
 
+import io.appium.java_client.ios.options.XCUITestOptions;
+import io.appium.java_client.remote.MobilePlatform;
 import io.perfecto.utilities.capabilities.CommonCapabilities;
 import org.junit.Test;
 
@@ -14,11 +16,11 @@ public class CommonCapabilitiesTests {
         CommonCapabilities capabilities = new CommonCapabilities();
 
         capabilities.addPerfectoOption("openDeviceTimeout", 3);
-        Map<String, Object> map = capabilities.getPerfectoOptions();
+        Map<String, Object> map = capabilities.getPerfectoOptionsMap();
         assertEquals(3, map.get("openDeviceTimeout"));
 
         capabilities.openDeviceTimeout = 2;
-        map = capabilities.getPerfectoOptions();
+        map = capabilities.getPerfectoOptionsMap();
         assertEquals(2, map.get("openDeviceTimeout"));
     }
 
@@ -27,7 +29,7 @@ public class CommonCapabilitiesTests {
     public void perfecto_token_is_automatically_added() throws Exception {
         CommonCapabilities capabilities = new CommonCapabilities("dummy");
 
-        Map<String, Object> map = capabilities.getPerfectoOptions();
+        Map<String, Object> map = capabilities.getPerfectoOptionsMap();
         assertEquals("dummy", map.get("securityToken"));
     }
 
@@ -58,8 +60,17 @@ public class CommonCapabilitiesTests {
     }
 
     @Test
-    public void for_local_execution_perfecto_option_is_null() throws Exception {
+    public void for_local_execution_perfecto_options_is_null() throws Exception {
         CommonCapabilities capabilities = new CommonCapabilities("localhost");
-        assertNull(capabilities.getPerfectoOptions());
+        assertNull(capabilities.getPerfectoOptionsMap());
+    }
+
+
+    @Test
+    public void as_map_returns_appium_and_perfecto_capabilities() throws Exception {
+        CommonCapabilities capabilities = new CommonCapabilities("dummy");
+        capabilities.platformName = MobilePlatform.IOS;
+        XCUITestOptions opts = (XCUITestOptions) capabilities.toOptions();
+        assertNotNull(opts.getCapability("perfecto:options"));
     }
 }

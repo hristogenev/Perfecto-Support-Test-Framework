@@ -4,7 +4,6 @@ import io.appium.java_client.remote.MobilePlatform;
 import io.perfecto.utilities.application.Application;
 import io.perfecto.utilities.capabilities.AppiumVersion;
 import io.perfecto.utilities.capabilities.CommonCapabilities;
-import io.perfecto.utilities.capabilities.ScreenResolution;
 import io.perfecto.utilities.extendedmobiledriver.ExtendedMobileDriver;
 import io.perfecto.utilities.reporting.Report;
 import io.perfecto.utilities.reporting.ReportBuilder;
@@ -368,12 +367,12 @@ public class TestAutomationSession {
 
     public void end (Exception ex) {
         try {
-            if (report.currentStepName != null)
-                report.endStep();
+            if (!report.done) {
+                if (report.currentStepName != null)
+                    report.endStep();
 
-            if (report.reportStarted)
                 report.endTestWithFailure(ex, ex.getMessage());
-
+            }
             if (!driver.isLocal) {
                 if (report.getUrl() != null) {
                     report.open();
@@ -391,11 +390,12 @@ public class TestAutomationSession {
 
     public void end() {
         try {
-            if (report.currentStepName != null)
-                report.endStep();
+            if (!report.done) {
+                if (report.currentStepName != null)
+                    report.endStep();
 
-            if (report.reportStarted)
                 report.endTest();
+            }
 
             if (report.getUrl() != null) {
                 report.open();
@@ -408,7 +408,6 @@ public class TestAutomationSession {
         } finally {
             driver.quit();
         }
-
     }
 
     public TestAutomationSession withPlatformNameWindows() {

@@ -10,7 +10,8 @@ public class UrlUtils {
     public static String getUrl(String cloudName) throws MalformedURLException {
 
         boolean isLocal = cloudName.equals("local");
-        return isLocal ? localServerAddress : String.format(perfectoServerAddress, cloudName);
+        return isLocal ? localServerAddress
+        : String.format(perfectoServerAddress, cloudName);
     }
 }
 

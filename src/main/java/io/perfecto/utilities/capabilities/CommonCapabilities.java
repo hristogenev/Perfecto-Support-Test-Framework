@@ -10,7 +10,10 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class CommonCapabilities<T> {
 
@@ -142,8 +145,8 @@ public class CommonCapabilities<T> {
     public Boolean waitForPageLoad;
     private XCUITestOptions xcuiTestOptions;
     private UiAutomator2Options uiAutomator2Options;
-    private Map<String, Object> appiumOptions;
-    private Map<String, Object> perfectoOptions;
+    private Map<String, Object> appiumOptionsMap;
+    private Map<String, Object> perfectoOptionsMap;
     private final List<Field> perfectoFields = new ArrayList<>() {};
     private final List<Field> appiumFields = new ArrayList<>() {};
 
@@ -151,14 +154,14 @@ public class CommonCapabilities<T> {
         buildFieldsMap();
     }
 
-    public CommonCapabilities(String cloudName) throws Exception {
+    public CommonCapabilities(String cloudName) {
         this();
         if (!cloudName.isBlank())
             this.cloudName = cloudName;
     }
 
     private void buildFieldsMap() {
-        logger.debug("Building fields map");
+        logger.debug("Building fields maps");
         for (Field field : getClass().getDeclaredFields()) {
             try {
                 Annotation[] annotations = field.getDeclaredAnnotations();
@@ -170,9 +173,7 @@ public class CommonCapabilities<T> {
 
                     if (type == AppiumOption.class){
                         appiumFields.add(field);
-                    }
-
-                    if (type == PerfectoOption.class) {
+                    } else if (type == PerfectoOption.class) {
                         perfectoFields.add(field);
                     }
                 }
@@ -184,63 +185,68 @@ public class CommonCapabilities<T> {
     }
 
 
-    public T toOptions() throws Exception {
-
-        if (platformName.equals(MobilePlatform.IOS)) {
-            xcuiTestOptions = new XCUITestOptions(getAppiumOptions());
-            setPerfectoCapabilities();
-            return (T) xcuiTestOptions;
-        }
-
-        if (platformName.equals(MobilePlatform.ANDROID)) {
-            uiAutomator2Options = new UiAutomator2Options(getAppiumOptions());
-            setPerfectoCapabilities();
-            return (T) uiAutomator2Options;
-        }
-
-        throw new Exception("Not supported platformName " + platformName);
-    }
-
-    public Map<String, ?> getAppiumOptions() throws Exception {
+    public Map<String, ?> getAppiumOptionsMap() {
         buildAppiumOptionsMap();
-        return appiumOptions;
+        printOptions("appium", appiumOptionsMap);
+        return appiumOptionsMap;
     }
 
-    public Map<String, ?> getPerfectoOptions() throws Exception {
+    private void printOptions(String optionsTypeName, Map<String, Object> options) {
+        if (options == null)
+            return;
+
+        for (Map.Entry<String, ?> option : options.entrySet()) {
+            logger.info("{}:{} = {}", optionsTypeName, option.getKey(), option.getValue());
+        }
+    }
+
+    public Map<String, ?> getPerfectoOptionsMap() {
         buildPerfectoOptionsMap();
-        return perfectoOptions;
+//        printOptions("perfecto", perfectoOptionsMap);
+        return perfectoOptionsMap;
     }
 
-    private void setPerfectoCapabilities() throws Exception {
+    private void setPerfectoCapabilities() {
         if (isLocalExecution())
             return;
         
         if (uiAutomator2Options != null) {
-            uiAutomator2Options.setCapability("perfecto:options", getPerfectoOptions());
+            uiAutomator2Options.setCapability("perfecto:options", getPerfectoOptionsMap());
             uiAutomator2Options.setAutomationName(automationName);
         }
 
         if(xcuiTestOptions != null) {
-            xcuiTestOptions.setCapability("perfecto:options", getPerfectoOptions());
+            xcuiTestOptions.setCapability("perfecto:options", getPerfectoOptionsMap());
+        }
+
+        if(appiumOptionsMap != null) {
+            appiumOptionsMap.put("perfecto:options", getPerfectoOptionsMap());
         }
     }
-    private void buildAppiumOptionsMap() throws Exception {
+    private void buildAppiumOptionsMap() {
 
-        if (appiumOptions == null)
-            appiumOptions = new HashMap<>();
+        if (appiumOptionsMap == null)
+            appiumOptionsMap = new HashMap<>();
 
-        if (isLocalExecution() && platformName.equals(MobilePlatform.ANDROID) && chromedriverExecutableDir == null) {
-            chromedriverExecutableDir = CommonProperties.getProperty("local.chromedriverExecutableDir");
+
+        if (isLocalExecution() && platformName.equals(MobilePlatform.ANDROID)) {
+            if (chromedriverExecutableDir == null && appiumOptionsMap.getOrDefault("chromedriverExecutableDir", null) == null ) {
+                chromedriverExecutableDir = CommonProperties.getProperty("local.chromedriverExecutableDir");
+            }
+            if (chromedriverExecutable == null && appiumOptionsMap.getOrDefault("chromedriverExecutable", null) == null ) {
+                chromedriverExecutable = CommonProperties.getProperty("local.chromedriverExecutable");
+            }
         }
 
         for (Field field : appiumFields) {
             try {
-                String name = field.getName();
-                Object value = field.get(this);
-                if (value == null)
+                String appiumOptionName = field.getName();
+                Object appiumOptionValue = field.get(this);
+
+                if (appiumOptionValue == null || appiumOptionsMap.getOrDefault(appiumOptionName, null) != null)
                     continue;
-                appiumOptions.put(name, value);
-                logger.info("appium:{} = {}", name, value);
+
+                appiumOptionsMap.put(appiumOptionName, appiumOptionValue);
             } catch (Exception e)
             {
                 e.printStackTrace();
@@ -248,26 +254,29 @@ public class CommonCapabilities<T> {
         }
     }
 
-    private void buildPerfectoOptionsMap() throws Exception {
+    private void buildPerfectoOptionsMap() {
 
         if (isLocalExecution())
             return;
 
-        if (perfectoOptions == null)
-            perfectoOptions = new HashMap<>();
+        if (perfectoOptionsMap == null)
+            perfectoOptionsMap = new HashMap<>();
 
-        if (securityToken == null) {
-            securityToken = new PerfectoTokenStorage().getTokenForCloud(cloudName);
+        try {
+            if (securityToken == null)
+                securityToken = new PerfectoTokenStorage().getTokenForCloud(cloudName);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
+
 
         for (Field field : perfectoFields) {
             try {
                 String name = field.getName();
                 Object value = field.get(this);
-                if (value == null)
+                if (value == null || perfectoOptionsMap.getOrDefault(name, null) != null)
                     continue;;
-                perfectoOptions.put(name, value);
-                logger.info("perfecto:{} = {}", name, value);
+                perfectoOptionsMap.put(name, value);
             } catch (Exception e)
             {
                 e.printStackTrace();
@@ -278,20 +287,19 @@ public class CommonCapabilities<T> {
 
     public void addAppiumOption(String optionName, Object optionValue) {
 
-        if (appiumOptions == null)
-            appiumOptions = new HashMap<>();
+        if (appiumOptionsMap == null)
+            appiumOptionsMap = new HashMap<>();
 
-        appiumOptions.put(optionName, optionValue);
-
+        appiumOptionsMap.put(optionName, optionValue);
     }
 
     public void addAppiumOptions(HashMap<String, ?> options) {
 
-        if (appiumOptions == null)
-            appiumOptions = new HashMap<>();
+        if (appiumOptionsMap == null)
+            appiumOptionsMap = new HashMap<>();
 
         for (Map.Entry<String, ?> option: options.entrySet())
-            appiumOptions.put(option.getKey(), option.getValue());
+            appiumOptionsMap.put(option.getKey(), option.getValue());
     }
 
 
@@ -300,10 +308,10 @@ public class CommonCapabilities<T> {
         if (isLocalExecution())
             return;
 
-        if (perfectoOptions == null)
-            perfectoOptions = new HashMap<>();
+        if (perfectoOptionsMap == null)
+            perfectoOptionsMap = new HashMap<>();
 
-        perfectoOptions.put(optionName, value);
+        perfectoOptionsMap.put(optionName, value);
 
     }
 
@@ -313,6 +321,26 @@ public class CommonCapabilities<T> {
             return;
 
         for (Map.Entry<String, ?> option: options.entrySet())
-            perfectoOptions.put(option.getKey(), option.getValue());
+            perfectoOptionsMap.put(option.getKey(), option.getValue());
+    }
+
+
+    public T toOptions()  {
+
+        switch (platformName) {
+            case MobilePlatform.IOS -> {
+                xcuiTestOptions = new XCUITestOptions(getAppiumOptionsMap());
+                setPerfectoCapabilities();
+                return (T) xcuiTestOptions;
+            }
+            case MobilePlatform.ANDROID -> {
+                uiAutomator2Options = new UiAutomator2Options(getAppiumOptionsMap());
+                setPerfectoCapabilities();
+                return (T) uiAutomator2Options;
+            }
+            default -> {
+                throw new RuntimeException("Not supported platformName " + platformName);
+            }
+        }
     }
 }

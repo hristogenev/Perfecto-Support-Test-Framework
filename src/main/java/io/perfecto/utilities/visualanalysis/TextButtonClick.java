@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class TextButtonClick {
+public class TextButtonClick implements HasOCRGenerics {
     private final static Logger logger = LoggerFactory.getLogger(TextButtonClick.class);
     private final static String script = "mobile:button-text:click";
     private final RemoteWebDriver driver;
@@ -68,6 +68,22 @@ public class TextButtonClick {
 
     public TextButtonClick setSource(String screenSource) {
         params.put("source", screenSource);
+        return this;
+    }
+
+    public TextButtonClick withGenericParameter(String paramName, Object paramValue) {
+        if (paramName == null || paramValue == null)
+            return this;
+
+        params.put(paramName, paramValue);
+        return this;
+    }
+
+    public TextButtonClick withOcrGeneric(String ocrGeneric) {
+        if (ocrGeneric == null || ocrGeneric.length() == 0)
+            return this;
+
+        params.put("ocr", ocrGeneric);
         return this;
     }
 

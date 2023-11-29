@@ -11,15 +11,32 @@ public class ApplicationTests {
 
     @Test
     public void app_upload_install_and_start() throws Exception {
-        ExtendedMobileDriver driver = DriverCreationUtils.createDriverForPerfectoAndroidDevice();
-        Application app = new Application(driver)
+
+        TestAutomationSession session = new TestAutomationSession()
+            .withPlatformNameAndroid()
+            .withCloud("beta")
+            .withDeviceName("R3CN206EJ7B")
+            .create()
+            ;
+
+        try {
+
+            ExtendedMobileDriver driver = session.getDriver();
+            Application app = new Application(driver)
                 .withLocalPath("//Users/hgenev/Applications/io.perfecto.webviewdemo-setWebContentsDebuggingEnabled.apk")
                 .withRepositoryPath("PUBLIC:io.perfecto.webviewdemo-setWebContentsDebuggingEnabled.apk")
                 .upload(true)
                 .install()
                 .open();
 
-        driver.quit();
+            session.end();
+
+        } catch (Exception ex)
+        {
+            session.end(ex);
+            ex.printStackTrace();
+            throw ex;
+        }
     }
 
     @Test

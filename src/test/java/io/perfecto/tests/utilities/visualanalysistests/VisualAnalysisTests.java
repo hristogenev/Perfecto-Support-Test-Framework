@@ -55,6 +55,7 @@ public class VisualAnalysisTests {
         textButtonClick
                 .setLabel("Password")
                 .setIndex(2)
+                .withOcrGeneric("natural-language=true")
                 .execute();
 
         editTextSetStep

@@ -5,12 +5,14 @@ import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.nativekey.AndroidKey;
 import io.appium.java_client.android.nativekey.KeyEvent;
 import io.perfecto.utilities.extendedmobiledriver.ExtendedMobileDriver;
+import io.perfecto.utilities.scripts.mobile.Touch;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,13 +21,11 @@ import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("unchecked")
 public class UserActions {
-    private static final String COMMAND_MOBILE_TOUCH_SWIPE = "mobile:touch:swipe";
-    private static final String COMMAND_MOBILE_TAP = "mobile:touch:tap";
     private final ExtendedMobileDriver driver;
     private final static Logger logger = LoggerFactory.getLogger(UserActions.class);
     private TimeUnit timeUnit;
     private WebDriverWait wait;
-    private int defaultWaitDurationInSeconds = 15;
+    private long defaultWaitDurationInSeconds = 15;
     private final Map<String, Object> params = new HashMap<>();
 
     public UserActions(ExtendedMobileDriver driver) {
@@ -35,6 +35,7 @@ public class UserActions {
     }
 
     public void setWait(Duration duration) {
+        defaultWaitDurationInSeconds = duration.toSeconds();
         wait = new WebDriverWait(driver.getDriver(), duration);
     }
 
@@ -44,10 +45,13 @@ public class UserActions {
     }
 
     public WebElement waitForElement(By by, int seconds) {
-        if (seconds != defaultWaitDurationInSeconds)
-            setWait(Duration.ofSeconds(seconds));
-        logger.info("Waiting {} {} for element {}", defaultWaitDurationInSeconds, timeUnit, by);
-        return wait.until(ExpectedConditions.visibilityOfElementLocated(by));
+        if (seconds != defaultWaitDurationInSeconds) {
+            WebDriverWait wait = new WebDriverWait(driver.getDriver(), Duration.ofSeconds(seconds));
+            logger.info("Waiting {} {} for element {}", defaultWaitDurationInSeconds, timeUnit, by);
+            return wait.until(ExpectedConditions.visibilityOfElementLocated(by));
+        }
+
+        return waitForElement(by);
     }
 
     public WebElement waitForElement(By by) {
@@ -283,7 +287,7 @@ public class UserActions {
         params.put("start", start);
         params.put("end", end);
         params.put("duration", durationInSeconds);
-        driver.executeScript(COMMAND_MOBILE_TOUCH_SWIPE, params);
+        driver.executeScript(Touch.SWIPE, params);
     }
 
     public void swipeLeft() {
@@ -302,22 +306,7 @@ public class UserActions {
         swipe("50%,20%", "50%,80%", 1);
     }
 
-    /**
-     *
-     * @param location The touch event coordinates. Format - either "x,y" or "x%,y%"
-     * @param durationInSeconds The duration, in seconds, for performing the touch operation. Use this to perform a "long-press".
-     */
-    public void touch(String location, int durationInSeconds) {
-        params.clear();
-        params.put("start", location);
-        params.put("duration", durationInSeconds);
-        driver.executeScript(COMMAND_MOBILE_TAP, params);
-    }
 
-    public void home() {
-        params.clear();
-        driver.executeScript("mobile:handset:ready", params);
-    }
 
     public boolean tryVisitUrl(String url) {
         try {
@@ -329,23 +318,66 @@ public class UserActions {
         }
     }
 
-    public void clickOnHomeScreen() {
+
+    public void goToHomeScreen() {
         if (driver.isAndroid)
             ((AndroidDriver)driver.getDriver()).pressKey(new KeyEvent(AndroidKey.HOME));
         else
             driver.executeScript("mobile: pressButton", ImmutableMap.of("name", "home"));
     }
 
-    public boolean tryClickOnHomeScreen() {
+    public boolean tryGoToHomeScreen() {
         try {
-            if (driver.isAndroid)
-                ((AndroidDriver)driver.getDriver()).pressKey(new KeyEvent(AndroidKey.HOME));
-            else
-                driver.executeScript("mobile: pressButton", ImmutableMap.of("name", "home"));
+            goToHomeScreen();
         } catch (Exception ex) {
             ex.printStackTrace();
             return false;
         }
         return true;
+    }
+
+    /**
+     * @param coordinates The touch event coordinates.
+     * Format - either "x1,y1,x2,y2" or "x1%,y1%,x2%,y2%"
+     * Coordinate value can be in pixels or in percentage of screen size (0-100).
+     * For percentage use the % sign. Example - "20%, 25%"
+     * It is recommended to use the percentage value as it translates to the screen resolution.
+     */
+    public void tapOnCoordinates(String coordinates) {
+        driver.executeScript(Touch.TAP, ImmutableMap.of("location", coordinates));
+    }
+
+    /**
+     * @param coordinates The touch event coordinates.
+     * Format - either "x1,y1,x2,y2" or "x1%,y1%,x2%,y2%"
+     * Coordinate value can be in pixels or in percentage of screen size (0-100).
+     * For percentage use the % sign. Example - "20%, 25%"
+     * It is recommended to use the percentage value as it translates to the screen resolution.
+     * @param duration The duration, in seconds, for performing the touch operation.
+     * Use this to perform a "long-press".
+     */
+    public void tapOnCoordinates(String coordinates, Duration duration) {
+        driver.executeScript(Touch.TAP,
+            ImmutableMap.of("location", coordinates, "duration", duration.toSeconds()));
+    }
+
+
+    /**
+     *
+     * @param location The touch event coordinates. Format - either "x,y" or "x%,y%"
+     * @param durationInSeconds The duration, in seconds, for performing the touch operation. Use this to perform a "long-press".
+     */
+    public void touch(String location, int durationInSeconds) {
+        driver.executeScript(Touch.TAP, ImmutableMap.of("location", location, "duration", durationInSeconds));
+    }
+
+    public void tapOnCoordinates(int x, int y) {
+        driver.executeScript(Touch.TAP,
+            ImmutableMap.of("location", String.format("%s,%s", x, y )));
+    }
+
+    public void tapOnCoordinates(int x, int y, Duration duration) {
+        driver.executeScript(Touch.TAP,
+            ImmutableMap.of("location", String.format("%s,%s", x, y), "duration", duration.toSeconds()));
     }
 }

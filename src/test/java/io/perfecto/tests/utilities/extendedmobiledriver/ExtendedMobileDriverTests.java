@@ -12,6 +12,9 @@ import io.perfecto.utilities.reporting.ReportBuilder;
 import io.perfecto.utilities.useractions.UserActions;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Capabilities;
+
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -117,5 +120,10 @@ public class ExtendedMobileDriverTests {
             e.printStackTrace();
             fail(e.getMessage());
         }
+    }
+
+    @Test
+    public void test1() {
+
     }
 }

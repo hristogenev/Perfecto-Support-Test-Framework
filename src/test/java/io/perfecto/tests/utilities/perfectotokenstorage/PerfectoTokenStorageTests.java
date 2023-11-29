@@ -28,7 +28,7 @@ public class PerfectoTokenStorageTests {
             fail(e.getMessage());
         }
         try {
-            assert(new PerfectoTokenStorage("/Users/hgenev/bin/tokens.ini").getTokenForCloud("dummy").equals("dummy"));
+            assert(new PerfectoTokenStorage("/Users/hgenev/tokens.ini").getTokenForCloud("dummy").equals("dummy"));
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

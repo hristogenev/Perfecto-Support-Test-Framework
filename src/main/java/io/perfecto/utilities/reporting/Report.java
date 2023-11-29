@@ -5,9 +5,8 @@ import com.perfecto.reportium.test.TestContext;
 import com.perfecto.reportium.test.result.TestResultFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.net.URI;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 
 public class Report {
     public String title = "Test";
@@ -17,13 +16,13 @@ public class Report {
     public String projectVersion;
     public String branchName;
     public String[] tags;
+    public Boolean done;
     private ReportiumClient reportiumClient;
     private final static Logger logger = LoggerFactory.getLogger(Report.class);
 
     private int stepCount = 0;
     public String currentStepName;
     private boolean isPerfectoReporting = false;
-    public boolean reportStarted = false;
 
     public Report() {
     }
@@ -42,8 +41,7 @@ public class Report {
 //                .withTestExecutionTags("Sanity", "Nightly")
 //                .withCustomFields(new CustomField("version", "OS11"))
                 .build());
-
-        reportStarted = true;
+        done = false;
     }
 
     public void startTest() {
@@ -64,7 +62,7 @@ public class Report {
             return;
 
         reportiumClient.testStop(TestResultFactory.createSuccess());
-        reportStarted = false;
+        done = true;
     }
 
     /**
@@ -81,8 +79,7 @@ public class Report {
             return;
 
         reportiumClient.testStop(TestResultFactory.createFailure("Test failed!"));
-        reportStarted = false;
-
+        done = true;
     }
 
     /**
@@ -100,8 +97,7 @@ public class Report {
             return;
 
         reportiumClient.testStop(TestResultFactory.createFailure(errorMessage));
-        reportStarted = false;
-
+        done = true;
     }
 
     /**
@@ -118,8 +114,7 @@ public class Report {
         if (reportiumClient == null)
             return;
         reportiumClient.testStop(TestResultFactory.createFailure(t.getMessage(), t, failureReason));
-        reportStarted = false;
-
+        done = true;
     }
 
     /**

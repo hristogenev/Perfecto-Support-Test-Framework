@@ -190,6 +190,14 @@ public class Application {
         closeAppWithId(appId);
     }
 
+    public void terminate() {
+        close();
+    }
+
+    public void terminatedApp(String appId) {
+        closeAppWithId(appId);
+    }
+
     public void close() {
 
         String identifierType = "identifier";
@@ -238,7 +246,7 @@ public class Application {
         return this;
     }
 
-    public Application activateApp() {
+    public Application activate() {
         ApplicationUtils.activateApp(driver, id);
         return this;
     }

@@ -67,4 +67,64 @@ public class Device {
   public void rotateToLandscape() {
     driver.executeScript(io.perfecto.utilities.scripts.mobile.Device.ROTATE, ImmutableMap.of("state", "landscape"));
   }
+
+  public String getManifacturer() {
+    return getProperty("manufacturer");
+  }
+
+  public String getModel() {
+    return getProperty("model");
+  }
+
+  public String getPhoneNumber() {
+    return getProperty("phoneNumber");
+  }
+
+  public String getDeviceId() {
+    return getProperty("deviceId");
+  }
+
+  public String getResolution() {
+    return getProperty("resolution");
+  }
+
+  public String getOs() {
+    return getProperty("os");
+  }
+
+  public String getOsVersion() {
+    return getProperty("osVersion");
+  }
+
+  public String getLocation() {
+    return getProperty("location");
+  }
+
+  public String getNetwork() {
+    return getProperty("network");
+  }
+
+  public String getDistributer() {
+    return getProperty("distributer");
+  }
+
+  public String getLanguage() {
+    return getProperty("language");
+  }
+
+  public String getCradleId() {
+    return getProperty("cradleId");
+  }
+
+  public String getDescription() {
+    return getProperty("description");
+  }
+
+  public String getStatus() {
+    return getProperty("status");
+  }
+
+  public String getProperty(String propertyName) {
+    return (String)driver.executeScript(io.perfecto.utilities.scripts.mobile.Device.INFO, ImmutableMap.of("property", propertyName));
+  }
 }

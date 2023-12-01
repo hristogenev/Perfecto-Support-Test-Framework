@@ -4,9 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import io.perfecto.utilities.extendedmobiledriver.ExtendedMobileDriver;
 import io.perfecto.utilities.scripts.mobile.Handset;
 
-import java.util.Collections;
-import java.util.Map;
-
 public class Device {
 
   private final ExtendedMobileDriver driver;
@@ -33,7 +30,7 @@ public class Device {
   }
 
   public void reboot() {
-    driver.executeScript(Handset.REBOOT, Map.of());
+    driver.executeScript(Handset.REBOOT, ImmutableMap.of());
   }
 
   /**
@@ -44,7 +41,7 @@ public class Device {
    * Restriction: When using this command in Automation scripts, the execution report video may not be available.
    */
   public void recover() {
-    driver.executeScript(Handset.RECOVER, Map.of());
+    driver.executeScript(Handset.RECOVER, ImmutableMap.of());
   }
 
   /**
@@ -53,5 +50,21 @@ public class Device {
    */
   public void shell(String command) {
     driver.executeScript(Handset.SHELL, ImmutableMap.of("command", command));
+  }
+
+  public void rotateNext() {
+    driver.executeScript(io.perfecto.utilities.scripts.mobile.Device.ROTATE, ImmutableMap.of("operation", "next"));
+  }
+
+  public void resetRotation() {
+    driver.executeScript(io.perfecto.utilities.scripts.mobile.Device.ROTATE, ImmutableMap.of("operation", "reset"));
+  }
+
+  public void rotateToPortrait() {
+    driver.executeScript(io.perfecto.utilities.scripts.mobile.Device.ROTATE, ImmutableMap.of("state", "portrait"));
+  }
+
+  public void rotateToLandscape() {
+    driver.executeScript(io.perfecto.utilities.scripts.mobile.Device.ROTATE, ImmutableMap.of("state", "landscape"));
   }
 }

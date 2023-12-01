@@ -127,4 +127,11 @@ public class Device {
   public String getProperty(String propertyName) {
     return (String)driver.executeScript(io.perfecto.utilities.scripts.mobile.Device.INFO, ImmutableMap.of("property", propertyName));
   }
+
+  public void lockFor(int seconds) {
+    driver.executeScript(io.perfecto.utilities.scripts.mobile.Screen.LOCK, ImmutableMap.of("timeout", seconds));
+  }
+  public String getLog(int numberOfLines) {
+    return (String)driver.executeScript(io.perfecto.utilities.scripts.mobile.Device.LOG, ImmutableMap.of("tail", numberOfLines));
+  }
 }

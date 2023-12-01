@@ -50,7 +50,7 @@ public class ExtendedMobileDriver<T extends AppiumDriver> {
 
         this.capabilities = capabilities;
 
-        String url = UrlUtils.getUrl(capabilities.cloudName);
+        String url = UrlUtils.buildUrl(capabilities.cloudName);
         isLocal = capabilities.isLocalExecution();
 
         Duration readTimeout = Duration.ofSeconds(

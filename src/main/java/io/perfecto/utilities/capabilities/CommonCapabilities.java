@@ -71,6 +71,12 @@ public class CommonCapabilities<T> {
     public String intentFlags;
     @PerfectoOption
     public Boolean iosResign;
+
+    public boolean isPerfectExecution() {
+        cloudName = cloudName.toLowerCase();
+        return cloudName != null && !cloudName.equals("local") && !cloudName.equals("localhost") && !cloudName.equals("127.0.0.1") && !cloudName.startsWith("http");
+    }
+
     public boolean isLocalExecution() {
         cloudName = cloudName.toLowerCase();
         return cloudName == null || cloudName.equals("local") || cloudName.equals("localhost") || cloudName.equals("127.0.0.1");
@@ -256,7 +262,7 @@ public class CommonCapabilities<T> {
 
     private void buildPerfectoOptionsMap() {
 
-        if (isLocalExecution())
+        if (!isPerfectExecution())
             return;
 
         if (perfectoOptionsMap == null)

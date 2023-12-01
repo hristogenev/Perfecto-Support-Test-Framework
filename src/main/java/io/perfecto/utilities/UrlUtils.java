@@ -1,16 +1,16 @@
 package io.perfecto.utilities;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 public class UrlUtils {
     private static String perfectoServerAddress = "https://%s.perfectomobile.com/nexperience/perfectomobile/wd/hub/";
     private static String localServerAddress = "http://127.0.0.1:4723/wd/hub/";
 
-    public static String getUrl(String cloudName) throws MalformedURLException {
+    public static String buildUrl(String cloudName) {
 
         boolean isLocal = cloudName.equals("local");
-        return isLocal ? localServerAddress
+        if (isLocal)
+            return localServerAddress;
+
+        return cloudName.startsWith("http") ? cloudName
         : String.format(perfectoServerAddress, cloudName);
     }
 }

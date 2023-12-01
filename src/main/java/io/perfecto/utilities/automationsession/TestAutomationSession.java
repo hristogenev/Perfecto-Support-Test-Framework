@@ -36,6 +36,11 @@ public class TestAutomationSession {
         return this;
     }
 
+    public TestAutomationSession withCustomUrl(String customUrl) {
+        commonCapabilities.cloudName = customUrl;
+        return this;
+    }
+
     public TestAutomationSession withPlatformNameAndroid() {
         commonCapabilities.platformName = MobilePlatform.ANDROID;
         return this;

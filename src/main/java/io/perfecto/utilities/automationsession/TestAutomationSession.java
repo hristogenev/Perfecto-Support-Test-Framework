@@ -275,7 +275,7 @@ public class TestAutomationSession {
     public TestAutomationSession create() throws Exception {
         driver = new ExtendedMobileDriver(commonCapabilities);
 
-        if (!commonCapabilities.isLocalExecution())
+        if (commonCapabilities.isPerfectExecution())
         {
             report = reportBuilder
                     .withDriver(driver)

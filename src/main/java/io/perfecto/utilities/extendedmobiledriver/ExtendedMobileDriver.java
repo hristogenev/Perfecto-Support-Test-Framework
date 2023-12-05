@@ -1,5 +1,6 @@
 package io.perfecto.utilities.extendedmobiledriver;
 
+import io.appium.java_client.AppiumClientConfig;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.options.UiAutomator2Options;
@@ -13,7 +14,6 @@ import io.perfecto.utilities.capabilities.CommonCapabilities;
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
-import org.openqa.selenium.remote.http.ClientConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +56,7 @@ public class ExtendedMobileDriver<T extends AppiumDriver> {
         Duration readTimeout = Duration.ofSeconds(
             Integer.valueOf((String) CommonProperties.getProperty("selenium.readTimeout.duration.seconds", "300")));
 
-        ClientConfig clientConfig = ClientConfig.defaultConfig()
+        AppiumClientConfig clientConfig = AppiumClientConfig.defaultConfig()
             .baseUri(URI.create(url))
             .readTimeout(readTimeout);
 

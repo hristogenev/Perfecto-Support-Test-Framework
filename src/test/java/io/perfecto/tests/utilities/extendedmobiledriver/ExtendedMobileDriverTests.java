@@ -1,5 +1,6 @@
 package io.perfecto.tests.utilities.extendedmobiledriver;
 
+import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.options.UiAutomator2Options;
 import io.appium.java_client.remote.AutomationName;
 import io.appium.java_client.remote.MobilePlatform;
@@ -12,9 +13,6 @@ import io.perfecto.utilities.reporting.ReportBuilder;
 import io.perfecto.utilities.useractions.UserActions;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Capabilities;
-
-import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -70,7 +68,7 @@ public class ExtendedMobileDriverTests {
         capabilities.useAppiumForWeb = true;
         capabilities.browserName = BrowserName.CHROME;
 
-        ExtendedMobileDriver driver = new ExtendedMobileDriver(capabilities);
+        ExtendedMobileDriver driver = new ExtendedMobileDriver<AndroidDriver>(capabilities);
 
         Report report = new ReportBuilder(driver)
             .withReportName("Open webpage and switch to Webview context")
@@ -80,8 +78,9 @@ public class ExtendedMobileDriverTests {
             .build();
 
         report.startTest();
-
-        driver.goToUrl("https://duckduckgo.com/");
+        AndroidDriver driver2 = (AndroidDriver)driver.getDriver();
+        driver2.get("https://duckduckgo.com/");
+//        driver.goToUrl("https://duckduckgo.com/");
         String title = driver.getDriver().getTitle();
 
         driver.printContextHandles();

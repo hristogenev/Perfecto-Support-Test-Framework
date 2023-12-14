@@ -11,6 +11,7 @@ import io.appium.java_client.remote.SupportsContextSwitching;
 import io.perfecto.utilities.CommonProperties;
 import io.perfecto.utilities.UrlUtils;
 import io.perfecto.utilities.capabilities.CommonCapabilities;
+import io.perfecto.utilities.scripts.mobile.Logs;
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
@@ -259,6 +260,17 @@ public class ExtendedMobileDriver<T extends AppiumDriver> {
         } catch (Exception ex) {
             logger.error("Error while extracting page source! " + ex.getMessage());
         }
+    }
+
+
+    public void startDebugLogging() {
+        logger.info("Starting debug logging");
+        driver.executeScript(Logs.START);
+    }
+
+    public void stopDebugLogging() {
+        logger.info("Stopping debug logging");
+        driver.executeScript(Logs.STOP);
     }
 
 }

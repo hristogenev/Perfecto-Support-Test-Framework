@@ -312,6 +312,14 @@ public class TestAutomationSession {
     }
 
 
+    public void startDebugLogging() {
+        driver.startDebugLogging();
+    }
+
+    public void stopDebugLogging() {
+        driver.stopDebugLogging();
+    }
+
     public Application getApplication() {
         if (app == null)
             createApplication();

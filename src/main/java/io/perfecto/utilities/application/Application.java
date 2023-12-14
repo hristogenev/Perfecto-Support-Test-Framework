@@ -186,8 +186,8 @@ public class Application {
     }
 
     public void restartAppWithId(String appId) {
-        openAppById(appId);
         closeAppWithId(appId);
+        openAppById(appId);
     }
 
     public void terminate() {

@@ -131,6 +131,8 @@ public class CommonCapabilities<T> {
     public String securityToken;
     @PerfectoOption
     public String screenshotFormat;
+    @AppiumOption
+    public Boolean showChromedriverLog;
     @PerfectoOption
     public String scriptName;
     @PerfectoOption

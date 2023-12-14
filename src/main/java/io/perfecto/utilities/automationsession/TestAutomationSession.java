@@ -4,6 +4,7 @@ import io.appium.java_client.remote.MobilePlatform;
 import io.perfecto.utilities.application.Application;
 import io.perfecto.utilities.capabilities.AppiumVersion;
 import io.perfecto.utilities.capabilities.CommonCapabilities;
+import io.perfecto.utilities.device.Device;
 import io.perfecto.utilities.extendedmobiledriver.ExtendedMobileDriver;
 import io.perfecto.utilities.reporting.Report;
 import io.perfecto.utilities.reporting.ReportBuilder;
@@ -24,6 +25,7 @@ public class TestAutomationSession {
     private String appId;
     private Report report = new Report();
     private ReportBuilder reportBuilder;
+    private Device device;
 
     public TestAutomationSession() {
         commonCapabilities  = new CommonCapabilities();
@@ -258,6 +260,11 @@ public class TestAutomationSession {
         return this;
     }
 
+    public TestAutomationSession withShowChromedriverLog() {
+        commonCapabilities.showChromedriverLog = true;
+        return this;
+    }
+
     public TestAutomationSession withUdid(String udid) {
         commonCapabilities.udid = udid;
         return this;
@@ -294,6 +301,16 @@ public class TestAutomationSession {
 
         return userActions;
     }
+
+
+    public Device getDevice() {
+        if (this.device == null) {
+            this.device = new Device(this.driver);
+        }
+
+        return this.device;
+    }
+
 
     public Application getApplication() {
         if (app == null)

@@ -260,4 +260,5 @@ public class ExtendedMobileDriver<T extends AppiumDriver> {
             logger.error("Error while extracting page source! " + ex.getMessage());
         }
     }
+
 }

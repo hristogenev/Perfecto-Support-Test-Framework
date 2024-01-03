@@ -4,31 +4,16 @@ import io.appium.java_client.InteractsWithApps;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.appmanagement.AndroidTerminateApplicationOptions;
 import io.appium.java_client.appmanagement.BaseTerminateApplicationOptions;
-import io.appium.java_client.ios.IOSDriver;
 import io.perfecto.utilities.extendedmobiledriver.DriverUtils;
 import io.perfecto.utilities.extendedmobiledriver.ExtendedMobileDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.methods.RequestBuilder;
-import org.apache.http.entity.ContentType;
-//import org.apache.http.entity.mime.MultipartEntityBuilder;
-//import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ApplicationUtils {
     private final static Logger logger = LoggerFactory.getLogger(ApplicationUtils.class);
@@ -42,6 +27,7 @@ public class ApplicationUtils {
 
         if (driver.isLocal) {
             ((InteractsWithApps) driver.getDriver()).activateApp(identifierValue);
+            return;
         }
 
         Map<String, Object> params = new HashMap<>();
@@ -130,7 +116,7 @@ public class ApplicationUtils {
         return true;
     }
 
-    public static Object uninstallApp(ExtendedMobileDriver driver, String identifierType, String identifierValue) {
+    public static void uninstallApp(ExtendedMobileDriver driver, String identifierType, String identifierValue) {
 
         logger.info("Uninstalling app with {} {}", identifierType, identifierValue);
         Objects.requireNonNull(driver);
@@ -139,12 +125,13 @@ public class ApplicationUtils {
 
         if (driver.isLocal) {
             ((InteractsWithApps) driver.getDriver()).removeApp(identifierValue);
+            return;
         }
 
         Map<String, Object> params = new HashMap<>();
         params.put(identifierType, identifierValue);
 
-        return (String) driver.executeScript("mobile:application:uninstall", params);
+        driver.executeScript("mobile:application:uninstall", params);
     }
 
     public static boolean isInstalled(ExtendedMobileDriver driver, String appId) {

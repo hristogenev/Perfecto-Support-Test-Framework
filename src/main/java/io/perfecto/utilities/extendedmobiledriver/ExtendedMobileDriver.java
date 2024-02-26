@@ -65,18 +65,20 @@ public class ExtendedMobileDriver<T extends AppiumDriver> {
             case MobilePlatform.ANDROID -> {
                 logger.info("Creating AndroidDriver with URL: {}", url);
                 _class = AndroidDriver.class;
-                logger.info("************* CAPABILITIES *************");
                 isAndroid = true;
                 isIos = false;
-                driver = (T) new AndroidDriver(clientConfig, (UiAutomator2Options) capabilities.toOptions());
+                var options = (UiAutomator2Options) capabilities.toOptions();
+                printOptions(options.asMap());
+                driver = (T) new AndroidDriver(clientConfig, options);
             }
             case MobilePlatform.IOS -> {
                 logger.info("Creating IOSDriver with URL: {}", url);
                 _class = IOSDriver.class;
                 isAndroid = false;
                 isIos = true;
-                logger.info("************* CAPABILITIES *************");
-                driver = (T) new IOSDriver(clientConfig, (XCUITestOptions) capabilities.toOptions());
+                var options = (XCUITestOptions) capabilities.toOptions();
+                printOptions(options.asMap());
+                driver = (T) new IOSDriver(clientConfig, options);
                 logSessionDetails();
             }
             default -> {
@@ -84,6 +86,24 @@ public class ExtendedMobileDriver<T extends AppiumDriver> {
             }
         }
         logSessionDetails();
+    }
+
+    private void printOptions(Map<String, Object> options) {
+        logger.info("************* CAPABILITIES *************");
+        if (options == null)
+            return;
+
+        for (var option : options.entrySet()) {
+            if (option.getValue() instanceof Map<?, ?>){
+                logger.info("************* {} *************", option.getKey());
+                for (var innerOption : ((Map<String,?>) option.getValue()).entrySet()) {
+                    logger.info("{} = {}", innerOption.getKey(), innerOption.getValue());
+                }
+                logger.info("***************************************");
+                continue;
+            }
+            logger.info("{} = {}", option.getKey(), option.getValue());
+        }
     }
 
     private void logSessionDetails() {
@@ -106,7 +126,7 @@ public class ExtendedMobileDriver<T extends AppiumDriver> {
 
     public void openReport() {
         try {
-            String reportUrl = (String) driver.getCapabilities().getCapability("testGridReportUrl");
+            var reportUrl = getReportUrl();
             if (reportUrl == null) {
                 logger.error("Report URL is not available");
                 return;
@@ -118,6 +138,16 @@ public class ExtendedMobileDriver<T extends AppiumDriver> {
         }
     }
 
+    public String getReportUrl() {
+        try {
+                var reportUrl = (String) driver.getCapabilities().getCapability("testGridReportUrl");
+        } catch (Exception ex) {
+            logger.error(ex.toString());
+        }
+        return null;
+    }
+
+
     public void takeScreenshot() {
         logger.info("Taking screenshot");
         driver.getScreenshotAs(OutputType.BASE64);
@@ -125,7 +155,7 @@ public class ExtendedMobileDriver<T extends AppiumDriver> {
 
     public void saveScreenshotFile(String filePath) throws IOException {
         logger.info("Saving screenshot to file {}", filePath);
-        File screenshotFile = driver.getScreenshotAs(OutputType.FILE);
+        var screenshotFile = driver.getScreenshotAs(OutputType.FILE);
         FileUtils.copyFile(screenshotFile, new File(filePath));
     }
 
@@ -147,7 +177,7 @@ public class ExtendedMobileDriver<T extends AppiumDriver> {
 
     public void printContextHandles() {
         logger.info("Available context handles:");
-        for (String context : getContextHandles()) {
+        for (var context : getContextHandles()) {
             logger.info(context);
         }
     }
@@ -162,7 +192,7 @@ public class ExtendedMobileDriver<T extends AppiumDriver> {
      * @throws Exception
      */
     public void switchToWebviewContext() throws Exception {
-        for (String context : getContextHandles()) {
+        for (var context : getContextHandles()) {
             if (context.toUpperCase().startsWith("WEBVIEW")) {
                 logger.info("Switching to {} context", context);
                 ((SupportsContextSwitching) driver).context(context);
@@ -203,28 +233,28 @@ public class ExtendedMobileDriver<T extends AppiumDriver> {
 
     public String getWindowHandle() {
         logger.debug("Getting current window handle");
-        String currentHandle = driver.getWindowHandle();
+        var currentHandle = driver.getWindowHandle();
         logger.info("Current window handle: {}", currentHandle);
         return currentHandle;
     }
 
     public Set<String> getWindowHandles() {
         logger.debug("Getting all window handle");
-        Set<String> handles = driver.getWindowHandles();
+        var handles = driver.getWindowHandles();
         logger.info("Got {} handles: {}", handles.size(), String.join(",", handles));
         return handles;
     }
 
     public void printWindowHandles() {
         logger.debug("Getting all window handle");
-        Set<String> handles = driver.getWindowHandles();
+        var handles = driver.getWindowHandles();
         logger.info("Got {} handles: {}", handles.size(), String.join(",", handles));
     }
 
     public boolean switchToNextTab() {
-        String currentHandle = getWindowHandle();
-        Set<String> handles = getWindowHandles();
-        for (String actual : handles) {
+        var currentHandle = getWindowHandle();
+        var handles = getWindowHandles();
+        for (var actual : handles) {
             if (!actual.equalsIgnoreCase(currentHandle)) {
                 logger.info("Switching to next tab {}", actual);
                 driver.switchTo().window(actual);
@@ -237,7 +267,7 @@ public class ExtendedMobileDriver<T extends AppiumDriver> {
 
     public boolean switchToTabByIndex(int index) {
         int currentIndex = 0;
-        for (String actual : getWindowHandles()) {
+        for (var actual : getWindowHandles()) {
             if (currentIndex == index) {
                 logger.info("Switching to next tab {}", actual);
                 driver.switchTo().window(actual);

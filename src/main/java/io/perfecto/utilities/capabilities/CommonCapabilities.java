@@ -4,6 +4,7 @@ import io.appium.java_client.android.options.UiAutomator2Options;
 import io.appium.java_client.ios.options.XCUITestOptions;
 import io.appium.java_client.remote.MobilePlatform;
 import io.perfecto.utilities.CommonProperties;
+import io.perfecto.utilities.CommonUtils;
 import io.perfecto.utilities.tokenstorage.PerfectoTokenStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,6 @@ public class CommonCapabilities<T> {
 
     private final static Logger logger = LoggerFactory.getLogger(CommonCapabilities.class);
     @AppiumOption
-    @PerfectoOption
     public String app;
     @AppiumOption
     public String appActivity;
@@ -54,7 +54,6 @@ public class CommonCapabilities<T> {
     public String cloudName = "local";
     @PerfectoOption
     public Boolean enableAppiumBehavior;
-    @PerfectoOption
     @AppiumOption
     public String deviceName;
     @PerfectoOption
@@ -70,7 +69,7 @@ public class CommonCapabilities<T> {
     @AppiumOption
     public String intentFlags;
     @PerfectoOption
-    public Boolean iosResign;
+    public Boolean iOSResign;
 
     public boolean isPerfectExecution() {
         cloudName = cloudName.toLowerCase();
@@ -195,17 +194,7 @@ public class CommonCapabilities<T> {
 
     public Map<String, ?> getAppiumOptionsMap() {
         buildAppiumOptionsMap();
-        printOptions("appium", appiumOptionsMap);
         return appiumOptionsMap;
-    }
-
-    private void printOptions(String optionsTypeName, Map<String, Object> options) {
-        if (options == null)
-            return;
-
-        for (Map.Entry<String, ?> option : options.entrySet()) {
-            logger.info("{}:{} = {}", optionsTypeName, option.getKey(), option.getValue());
-        }
     }
 
     public Map<String, ?> getPerfectoOptionsMap() {
@@ -236,7 +225,6 @@ public class CommonCapabilities<T> {
         if (appiumOptionsMap == null)
             appiumOptionsMap = new HashMap<>();
 
-
         if (isLocalExecution() && platformName.equals(MobilePlatform.ANDROID)) {
             if (chromedriverExecutableDir == null && appiumOptionsMap.getOrDefault("chromedriverExecutableDir", null) == null ) {
                 chromedriverExecutableDir = CommonProperties.getProperty("local.chromedriverExecutableDir");
@@ -251,8 +239,13 @@ public class CommonCapabilities<T> {
                 String appiumOptionName = field.getName();
                 Object appiumOptionValue = field.get(this);
 
+                // if null or already set
                 if (appiumOptionValue == null || appiumOptionsMap.getOrDefault(appiumOptionName, null) != null)
                     continue;
+
+                if (appiumOptionName.equals("app") && isLocalExecution() && appiumOptionValue != null) {
+                    appiumOptionValue = CommonUtils.convertToLocalRepoPath((String)appiumOptionValue, CommonProperties.getProperty("local.repositoryDir"));
+                }
 
                 appiumOptionsMap.put(appiumOptionName, appiumOptionValue);
             } catch (Exception e)
@@ -261,6 +254,7 @@ public class CommonCapabilities<T> {
             }
         }
     }
+
 
     private void buildPerfectoOptionsMap() {
 

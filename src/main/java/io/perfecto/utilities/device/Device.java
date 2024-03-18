@@ -3,9 +3,16 @@ package io.perfecto.utilities.device;
 import com.google.common.collect.ImmutableMap;
 import io.perfecto.utilities.extendedmobiledriver.ExtendedMobileDriver;
 import io.perfecto.utilities.scripts.mobile.Handset;
+import io.perfecto.utilities.scripts.mobile.Location;
+import io.perfecto.utilities.scripts.mobile.Monitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Device {
-
+  private final Logger log = LoggerFactory.getLogger(getClass());
   private final ExtendedMobileDriver driver;
 
   public Device(ExtendedMobileDriver driver) {
@@ -133,5 +140,75 @@ public class Device {
   }
   public String getLog(int numberOfLines) {
     return (String)driver.executeScript(io.perfecto.utilities.scripts.mobile.Device.LOG, ImmutableMap.of("tail", numberOfLines));
+  }
+
+
+  public String startDeviceVitalsCollection() {
+    return startVitalsCollection("Device", null, null);
+  }
+
+  public String startAppVitalsCollection(String appId) {
+    return startVitalsCollection(appId, null, null);
+  }
+
+  public String startAppVitalsCollection(String appId, String monitors, int intervalInSeconds) {
+    return startVitalsCollection(appId, monitors, intervalInSeconds);
+  }
+
+  public String startVitalsCollection(String sources, String monitors, Integer intervalInSeconds) {
+    Map<String, Object> params = new HashMap<>();
+
+    params.put("sources", sources);
+
+    if (monitors != null && monitors.isEmpty())
+      params.put("monitors", monitors);
+
+    if (monitors != null)
+      params.put("interval", intervalInSeconds);
+
+    return (String) driver.executeScript(Monitor.START, params);
+  }
+
+  public String stopVitalsCollection() {
+    return (String) driver.executeScript(Monitor.STOP, new HashMap<>());
+  }
+  public String stopVitalsCollection(String appId) {
+    return (String) driver.executeScript(Monitor.STOP, ImmutableMap.of("sources", appId));
+  }
+
+  /**
+   * Sets the device location. This enables testing a location-aware app that uses location services
+   * without moving the device from place to place to generate location data.
+   * @param coordinates The latitude and longitude coordinate of the device location to set.
+   * Example: 43.642659,-79.387050
+   */
+  public void setLocationAsCoordinates(String coordinates) {
+    log.info("Setting device location as coordinates: {}", coordinates);
+    Map<String, Object> params = new HashMap<>();
+    params.put("coordinates", coordinates);
+    driver.executeScript(Location.SET, params);
+  }
+
+
+  /**
+   * Sets the device location. This enables testing a location-aware app that uses location services
+   * without moving the device from place to place to generate location data.
+   * @param address The address location to set. Format: Google Geocoding.
+   * Example: 1600 Amphitheatre Parkway, Mountain View, CA
+   */
+  public void setLocationAsAddress(String address) {
+    log.info("Setting device location as address: {}", address);
+    Map<String, Object> params = new HashMap<>();
+    params.put("address", address);
+    driver.executeScript(Location.SET, params);
+  }
+
+
+  /**
+   * Stops setting the device location. This returns the device to its current actual location.
+   * Used alongside the Set device location function
+   */
+  public void resetLocation() {
+    driver.executeScript(Location.RESET, new HashMap<>());
   }
 }
